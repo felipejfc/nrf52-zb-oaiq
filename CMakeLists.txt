@@ -4,6 +4,11 @@
 # SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
 #
 
+list(APPEND ZEPHYR_EXTRA_MODULES
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/modules/scd4x
+  )
+
+
 cmake_minimum_required(VERSION 3.20.0)
 
 ################################################################################
@@ -12,7 +17,7 @@ cmake_minimum_required(VERSION 3.20.0)
 set(APPLICATION_CONFIG_DIR "${CMAKE_CURRENT_SOURCE_DIR}/configuration/\${BOARD}")
 
 find_package(Zephyr REQUIRED HINTS $ENV{ZEPHYR_BASE})
-project(zigbee_weather_station_1)
+project(zigbee_weather_station)
 
 ################################################################################
 
@@ -21,6 +26,7 @@ target_sources(app PRIVATE
   ${CMAKE_CURRENT_SOURCE_DIR}/src/main.c
   ${CMAKE_CURRENT_SOURCE_DIR}/src/sensor.c
   ${CMAKE_CURRENT_SOURCE_DIR}/src/weather_station.c
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/pm/flash.c
 )
 
 # NORDIC SDK APP END

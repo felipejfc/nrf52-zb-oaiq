@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
  */
 
+#include <zephyr/kernel.h>
 #include <zephyr/device.h>
 #include <dk_buttons_and_leds.h>
 #include <zephyr/drivers/uart.h>
@@ -15,6 +16,7 @@
 #include <zephyr/kernel.h>
 #include <zigbee/zigbee_app_utils.h>
 #include <zigbee/zigbee_error_handler.h>
+#include "pm/flash.h"
 
 #ifdef CONFIG_USB_DEVICE_STACK
 #include <zephyr/usb/usb_device.h>
@@ -300,10 +302,12 @@ static void check_weather(zb_bufid_t bufid)
 			LOG_ERR("Failed to update temperature: %d", err);
 		}
 
+/*
 		err = weather_station_update_pressure();
 		if (err) {
 			LOG_ERR("Failed to update pressure: %d", err);
 		}
+		*/
 
 		err = weather_station_update_humidity();
 		if (err) {
@@ -342,6 +346,9 @@ void zboss_signal_handler(zb_bufid_t bufid)
 		if (err) {
 			LOG_ERR("Failed to schedule app alarm: %d", err);
 		}
+	case ZB_COMMON_SIGNAL_CAN_SLEEP:
+		/* Zigbee stack can enter sleep mode */
+		zb_sleep_now();
 		break;
 	default:
 		break;
@@ -357,6 +364,26 @@ void zboss_signal_handler(zb_bufid_t bufid)
 	if (bufid) {
 		zb_buf_free(bufid);
 	}
+}
+
+void turn_off_flash(void)
+{
+/* Put the flash into deep power down mode
+     * Note. The init will fail if the system is reset without power loss.
+     * I believe the init fails because the chip is still in dpd mode. I also
+     * think this is why Zephyr is having issues.
+     * The chip seems to stay in dpd and is OK after another reset or full power
+     * cycle.
+     * Since the errors are ignored I removed the checks.
+     */
+    da_flash_init();
+    da_flash_command(0xB9);
+    da_flash_uninit();	
+}
+
+void configure_zb(){
+	zb_set_ed_timeout(ED_AGING_TIMEOUT_64MIN);
+	zb_set_keepalive_timeout(ZB_MILLISECONDS_TO_BEACON_INTERVAL(60000));
 }
 
 int main(void)
@@ -381,14 +408,21 @@ int main(void)
 	/* Register callback to identify notifications */
 	ZB_AF_SET_IDENTIFY_NOTIFICATION_HANDLER(WEATHER_STATION_ENDPOINT_NB, identify_callback);
 
-	/* Enable Sleepy End Device behavior */
-	zb_set_rx_on_when_idle(ZB_FALSE);
 	if (IS_ENABLED(CONFIG_RAM_POWER_DOWN_LIBRARY)) {
 		power_down_unused_ram();
 	}
 
+	configure_zb();
+
+	// Turn off qspi flash
+	turn_off_flash();
+
+	/* Enable Sleepy End Device behavior */
+	//zigbee_configure_sleepy_behavior(true);
+	zb_set_rx_on_when_idle(ZB_FALSE);
+
 	/* Start Zigbee stack */
 	zigbee_enable();
 
-	return 0;
+	return;
 }
