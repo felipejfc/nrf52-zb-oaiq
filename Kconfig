@@ -12,7 +12,7 @@ endif
 # How often sensor data is read
 config WEATHER_CHECK_PERIOD_SECONDS
 	int
-	default 60
+	default 300
 
 # Delay after app initialization
 config FIRST_WEATHER_CHECK_DELAY_SECONDS

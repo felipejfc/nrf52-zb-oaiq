@@ -15,11 +15,11 @@
             label = "Push button down";
             gpios = <&gpio0 28 (GPIO_PULL_UP | GPIO_ACTIVE_LOW)>;
         };
-        buttonDPD: button_DPD {
-            label = "Push button up";
-            gpios = <&gpio0 29 (GPIO_PULL_UP | GPIO_ACTIVE_LOW)>;
-        };
     };
+
+    zephyr,user {
+    	signal-gpios = <&gpio0 29 GPIO_ACTIVE_HIGH>;
+   	};
 };
 
 &i2c1 {

@@ -329,7 +329,118 @@ static int scd4x_sample_fetch(const struct device *dev,
 			* Wake up the sensor if necessary before issuing a single shot command, will be powered
 			* down again after reading the measurement.
 			*/
+			if (!device_is_ready(cfg->bus.bus))
+			{
+				LOG_ERR("Device not ready.");
+				return -ENODEV;
+			}
+
 			scd4x_wake_up(dev);
+
+			rc = scd4x_stop_periodic_measurement(dev);
+			if (rc < 0)
+			{
+				LOG_ERR("Failed to stop periodic measurement on the device.");
+				return rc;
+			}
+
+/*
+			rc = scd4x_reinit(dev);
+			if (rc < 0)
+			{
+				LOG_ERR("Failed to reinitialize the device.");
+				return rc;
+			}
+*/
+			rc = scd4x_get_serial_number(dev);
+			if (rc < 0)
+			{
+				LOG_ERR("Failed to read serial number from the device.");
+				return rc;
+			}
+		
+			LOG_ERR("SERIAL READ OK");
+
+/*
+
+	scd4x_wake_up(dev);
+
+	rc = scd4x_stop_periodic_measurement(dev);
+	if (rc < 0) {
+		LOG_ERR("Failed to stop periodic measurement on the device.");
+		return rc;
+	}
+
+	rc = scd4x_reinit(dev);
+	if (rc < 0) {
+		LOG_ERR("Failed to reinitialize the device.");
+		return rc;
+	}
+
+	rc = scd4x_set_sensor_altitude(dev, cfg->altitude);
+	if (rc < 0) {
+		LOG_ERR("Failed to set sensor altitude on the device.");
+		return rc;
+	}
+
+
+	uint16_t sensor_altitude;
+	rc = scd4x_get_sensor_altitude(dev, &sensor_altitude);
+	if (rc < 0) {
+		LOG_ERR("Failed to get sensor altitude from the device.");
+		return rc;
+	}
+
+
+	rc = scd4x_set_temperature_offset(dev, cfg->temperature_offset);
+	if (rc < 0) {
+		LOG_ERR("Failed to set temperature offset on the device.");
+		return rc;
+	}
+
+
+	int16_t temperature_offset;
+	rc = scd4x_get_temperature_offset(dev, &temperature_offset);
+	if (rc < 0) {
+		LOG_ERR("Failed to get temperature offset from the device.");
+		return rc;
+	}
+
+	rc = scd4x_get_serial_number(dev);
+	if (rc < 0) {
+		LOG_ERR("Failed to read serial number from the device.");
+		return rc;
+	}
+
+
+	rc = scd4x_write_reg(dev, SCD4X_CMD_SET_AUTOMATIC_SELF_CALIBRATION_ENABLED, cfg->auto_calibration);
+	if (rc < 0) {
+		LOG_ERR("Failed to set auto calibration on the device.");
+		return rc;
+	}
+	k_sleep(K_MSEC(SCD4X_SET_AUTOMATIC_CALIBRATION_WAIT_MS));
+	// Disable initial periodic measurements
+	rc = scd4x_stop_periodic_measurement(dev);
+	if (rc < 0) {
+		LOG_ERR("Failed to stop periodic measurement on the device.");
+		return rc;
+	}
+
+	if (cfg->model == SCD4X_MODEL_SCD41 && cfg->measure_mode == SCD4X_MEASURE_MODE_SINGLE_SHOT) {
+		if (cfg->single_shot_power_down) {
+			/*
+			* Power down the sensor until the first measurement is requested
+			scd4x_power_down(dev);
+		}
+	} else {
+		rc = scd4x_start_periodic_measurement(dev, cfg->measure_mode);
+		if (rc < 0) {
+			LOG_ERR("Failed to start periodic measurement on the device.");
+			return rc;
+		}
+	}
+			*/
+
 		}
 
 		if ((chan & SENSOR_CHAN_AMBIENT_TEMP) == chan ||
@@ -358,6 +469,7 @@ static int scd4x_sample_fetch(const struct device *dev,
 		* will return an error, which should prevent the kernel from getting stuck in an infinite loop here.
 		*/
 	uint16_t status_register = 0;
+	uint8_t retries = 0;
 	while (!(SCD4X_MEASURE_READY(status_register))) {
 		uint8_t rx_buf[3];
 		rc = scd4x_read_reg(dev, SCD4X_CMD_GET_DATA_READY_STATUS, rx_buf, sizeof(rx_buf));
@@ -462,94 +574,10 @@ static int scd4x_pm_action(const struct device *dev,
 }
 #endif /* CONFIG_PM_DEVICE */
 
-
 static int scd4x_init(const struct device *dev)
 {
 	const struct scd4x_config *cfg = dev->config;
 	int rc = 0;
-
-	if (!device_is_ready(cfg->bus.bus)) {
-		LOG_ERR("Device not ready.");
-		return -ENODEV;
-	}
-
-	scd4x_wake_up(dev);
-
-	rc = scd4x_stop_periodic_measurement(dev);
-	if (rc < 0) {
-		LOG_ERR("Failed to stop periodic measurement on the device.");
-		return rc;
-	}
-
-	rc = scd4x_reinit(dev);
-	if (rc < 0) {
-		LOG_ERR("Failed to reinitialize the device.");
-		return rc;
-	}
-
-	rc = scd4x_set_sensor_altitude(dev, cfg->altitude);
-	if (rc < 0) {
-		LOG_ERR("Failed to set sensor altitude on the device.");
-		return rc;
-	}
-
-
-	uint16_t sensor_altitude;
-	rc = scd4x_get_sensor_altitude(dev, &sensor_altitude);
-	if (rc < 0) {
-		LOG_ERR("Failed to get sensor altitude from the device.");
-		return rc;
-	}
-
-
-	rc = scd4x_set_temperature_offset(dev, cfg->temperature_offset);
-	if (rc < 0) {
-		LOG_ERR("Failed to set temperature offset on the device.");
-		return rc;
-	}
-
-
-	int16_t temperature_offset;
-	rc = scd4x_get_temperature_offset(dev, &temperature_offset);
-	if (rc < 0) {
-		LOG_ERR("Failed to get temperature offset from the device.");
-		return rc;
-	}
-
-	rc = scd4x_get_serial_number(dev);
-	if (rc < 0) {
-		LOG_ERR("Failed to read serial number from the device.");
-		return rc;
-	}
-
-
-	rc = scd4x_write_reg(dev, SCD4X_CMD_SET_AUTOMATIC_SELF_CALIBRATION_ENABLED, cfg->auto_calibration);
-	if (rc < 0) {
-		LOG_ERR("Failed to set auto calibration on the device.");
-		return rc;
-	}
-	k_sleep(K_MSEC(SCD4X_SET_AUTOMATIC_CALIBRATION_WAIT_MS));
-	// Disable initial periodic measurements
-	rc = scd4x_stop_periodic_measurement(dev);
-	if (rc < 0) {
-		LOG_ERR("Failed to stop periodic measurement on the device.");
-		return rc;
-	}
-
-	if (cfg->model == SCD4X_MODEL_SCD41 && cfg->measure_mode == SCD4X_MEASURE_MODE_SINGLE_SHOT) {
-		if (cfg->single_shot_power_down) {
-			/*
-			* Power down the sensor until the first measurement is requested
-			*/
-			scd4x_power_down(dev);
-		}
-	} else {
-		rc = scd4x_start_periodic_measurement(dev, cfg->measure_mode);
-		if (rc < 0) {
-			LOG_ERR("Failed to start periodic measurement on the device.");
-			return rc;
-		}
-	}
 
 	return 0;
 }
