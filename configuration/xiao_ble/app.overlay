@@ -23,17 +23,19 @@
 };
 
 &i2c1 {
+	/* */
+	compatible = "nordic,nrf-twim";
+	status = "okay";
+	clock-frequency = <I2C_BITRATE_FAST>;
+
+	pinctrl-0 = <&i2c1_default>;
+	pinctrl-1 = <&i2c1_sleep>;
+	pinctrl-names = "default", "sleep";
 	status = "okay";
 
-	sensirion_scd4x@62 {
-		compatible = "sensirion,scd4x";
-		reg = <0x62>;
-		status = "okay";
-		model = "scd41";
-		measure-mode = "single-shot";
-		temperature-offset = <4>;
-		single-shot-power-down;
-		auto-calibration;
+	bme688@77 {
+		compatible = "bosch,bme688";
+		reg = <0x77>;
 	};
 };
 

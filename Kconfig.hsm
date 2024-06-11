@@ -1,0 +1,5 @@
+menu "My sensors"
+
+rsource "src/modules/bme688/Kconfig"
+
+endmenu

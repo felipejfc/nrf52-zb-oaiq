@@ -22,7 +22,7 @@
 #include <zephyr/usb/usb_device.h>
 #endif /* CONFIG_USB_DEVICE_STACK */
 
-#include "weather_station.h"
+#include "reporting.h"
 
 /* Delay for console initialization */
 #define WAIT_FOR_CONSOLE_MSEC 100
@@ -288,42 +288,6 @@ static void wait_for_console(void)
 }
 #endif /* CONFIG_USB_DEVICE_STACK */
 
-static void check_weather(zb_bufid_t bufid)
-{
-	ZVUNUSED(bufid);
-
-	int err = weather_station_check_weather();
-
-	if (err) {
-		LOG_ERR("Failed to check weather: %d", err);
-	} else {
-		err = weather_station_update_temperature();
-		if (err) {
-			LOG_ERR("Failed to update temperature: %d", err);
-		}
-
-/*
-		err = weather_station_update_pressure();
-		if (err) {
-			LOG_ERR("Failed to update pressure: %d", err);
-		}
-		*/
-
-		err = weather_station_update_humidity();
-		if (err) {
-			LOG_ERR("Failed to update humidity: %d", err);
-		}
-	}
-
-	zb_ret_t zb_err = ZB_SCHEDULE_APP_ALARM(check_weather,
-						0,
-						ZB_MILLISECONDS_TO_BEACON_INTERVAL(
-							WEATHER_CHECK_PERIOD_MSEC));
-	if (zb_err) {
-		LOG_ERR("Failed to schedule app alarm: %d", zb_err);
-	}
-}
-
 void zboss_signal_handler(zb_bufid_t bufid)
 {
 	zb_zdo_app_signal_hdr_t *signal_header = NULL;
@@ -339,13 +303,12 @@ void zboss_signal_handler(zb_bufid_t bufid)
 	switch (signal) {
 	case ZB_ZDO_SIGNAL_SKIP_STARTUP:
 		/* ZBOSS framework has started - schedule first weather check */
+		/*
 		err = ZB_SCHEDULE_APP_ALARM(check_weather,
 					    0,
 					    ZB_MILLISECONDS_TO_BEACON_INTERVAL(
 						    WEATHER_CHECK_INITIAL_DELAY_MSEC));
-		if (err) {
-			LOG_ERR("Failed to schedule app alarm: %d", err);
-		}
+		*/
 	case ZB_COMMON_SIGNAL_CAN_SLEEP:
 		/* Zigbee stack can enter sleep mode */
 		zb_sleep_now();

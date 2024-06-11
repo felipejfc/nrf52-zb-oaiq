@@ -1,0 +1,54 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "PyOCD Flash",
+			"type": "shell",
+			"windows": {
+				"command": "C:/Users/fjfca/AppData/Roaming/Python/Python311/Scripts/pyocd.exe"
+			},
+			"args": [
+				"load",
+                "C:\\Users\\fjfca\\dev\\home\\nordic\\zigbee_weather_station_1\\build\\zephyr\\merged.hex",
+                "--target",
+                "nrf52840",
+                "--frequency",
+                "4000000"
+			],
+			"problemMatcher": [
+				"$gcc"
+			]
+		},
+		{
+			"label": "gdbserver",
+			"type": "shell",
+			"windows": {
+				"command": "C:/Users/fjfca/AppData/Roaming/Python/Python311/Scripts/pyocd.exe"
+			},
+			"args": [
+				"gdbserver",
+                "--target",
+                "nrf52840",
+                "--frequency",
+                "4000000"
+			],
+			"problemMatcher": [
+				"$gcc"
+			]
+		},
+        {
+            "label": "build",
+            "type": "shell",
+            "command": "cmake",
+            "args": [
+                "--build",
+                "./build"
+            ],
+            "group": "build",
+            "presentation": {
+                "reveal": "silent",
+            },
+            "problemMatcher": "$msCompile"
+        }
+	],
+}

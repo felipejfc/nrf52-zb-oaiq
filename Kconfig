@@ -4,6 +4,9 @@
 # SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
 #
 
+rsource "src/modules/bme688/Kconfig"
+rsource "src/subsys/bme688_server/Kconfig"
+
 if USB
 config USB_DEVICE_PID
 	default 0x53A0
