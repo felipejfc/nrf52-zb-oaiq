@@ -18,7 +18,8 @@
     };
 
     zephyr,user {
-    	signal-gpios = <&gpio0 29 GPIO_ACTIVE_HIGH>;
+    	rst-gpios = <&gpio0 03 GPIO_ACTIVE_HIGH>;
+    	busy-gpios = <&gpio0 29 GPIO_ACTIVE_HIGH>;
    	};
 };
 
@@ -36,6 +37,11 @@
 	bme688@77 {
 		compatible = "bosch,bme688";
 		reg = <0x77>;
+	};
+
+	epaper-comm@3D {
+		compatible = "waveshare,epaper-comm";
+		reg = <0x3D>;
 	};
 };
 

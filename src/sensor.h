@@ -12,7 +12,6 @@
 
 
 /* Measurements ranges for Bosch BME688 sensor */
-#define ZEPHYR_USER_NODE DT_PATH(zephyr_user)
 #define SENSOR_TEMP_CELSIUS_MIN (-40)
 #define SENSOR_TEMP_CELSIUS_MAX (85)
 #define SENSOR_TEMP_CELSIUS_TOLERANCE (1)

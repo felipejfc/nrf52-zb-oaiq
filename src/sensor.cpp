@@ -8,8 +8,10 @@
 #include "sensor.h"
 #include <string>
 #include <json.hpp>
+#include <zephyr/sys/time_units.h>
 #include <bme688_server.h>
 #include "reporting.h"
+#include "epaper.h"
 
 using namespace nlohmann;
 
@@ -22,6 +24,8 @@ using namespace nlohmann;
 LOG_MODULE_DECLARE(app, CONFIG_ZIGBEE_WEATHER_STATION_LOG_LEVEL);
 
 static const struct device *sensor;
+
+static int64_t last_display_update = 0;
 
 void bme688_handler(json &data){
 	std::string text = data.dump(4);
@@ -46,6 +50,13 @@ void bme688_handler(json &data){
 	err = weather_station_update_humidity(humidity);
 	if (err) {
 		LOG_ERR("Failed to update humidity: %d", err);
+	}
+
+	int64_t time_now = k_ticks_to_ms_near64(k_uptime_ticks());
+	if (time_now - last_display_update > 180000 || last_display_update == 0) {
+		last_display_update = time_now;
+		EPD_1in9_Set_TempHum(temperature * 100, humidity * 100);
+		EPD_1in9_sleep();
 	}
 }
 

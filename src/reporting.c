@@ -12,13 +12,6 @@ LOG_MODULE_DECLARE(app, CONFIG_ZIGBEE_WEATHER_STATION_LOG_LEVEL);
 
 int weather_station_init(void)
 {
-	const struct gpio_dt_spec signal =
-		GPIO_DT_SPEC_GET(ZEPHYR_USER_NODE, signal_gpios);
-
-	/* Configure the pin */
-	gpio_pin_configure_dt(&signal, GPIO_OUTPUT_ACTIVE);
-	gpio_pin_set_dt(&signal, 1);
-
 	int err = sensor_init();
 
 	if (err) {

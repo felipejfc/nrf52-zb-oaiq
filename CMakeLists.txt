@@ -27,6 +27,7 @@ add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/src/subsys/app_flash)
 zephyr_include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src/modules/bme688)
 zephyr_include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src/subsys/bme688_server)
 zephyr_include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src/subsys/app_flash)
+zephyr_include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src/modules/epaper)
 zephyr_include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 ################################################################################
@@ -41,6 +42,9 @@ target_sources(app PRIVATE
   ${CMAKE_CURRENT_SOURCE_DIR}/src/subsys/bme688_server/bsec2/bsec2.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/modules/bme688/bme688.c
   ${CMAKE_CURRENT_SOURCE_DIR}/src/subsys/app_flash/flash_settings_storage.cpp
+  #epaper
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/modules/epaper/epaper.c
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/modules/epaper/epaper_comm.c
 )
 
 # NORDIC SDK APP END
