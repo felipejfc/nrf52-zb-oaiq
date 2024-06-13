@@ -10,8 +10,11 @@
         "span": "cpp",
         "vector": "cpp",
         "xutility": "cpp",
-        "compare": "c"
+        "compare": "c",
+        "stdlib.h": "c",
+        "filesystem": "c"
     },
     "nrf-connect.toolchain.path": "${nrf-connect.toolchain:2.6.1}",
-    "nrf-connect.topdir": "${nrf-connect.sdk:2.6.1}"
+    "nrf-connect.topdir": "${nrf-connect.sdk:2.6.1}",
+    "C_Cpp.default.configurationProvider": "nordic-semiconductor.nrf-connect"
 }
