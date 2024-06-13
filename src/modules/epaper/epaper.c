@@ -31,7 +31,7 @@ LOG_MODULE_REGISTER(epaper, LOG_LEVEL_DBG);
 function :	GPIO Init
 parameter:
 ******************************************************************************/
-void GPIOInit(void)
+void EPaper_GPIOInit(void)
 {
 
 	const struct gpio_dt_spec rst =
@@ -40,8 +40,12 @@ void GPIOInit(void)
 	const struct gpio_dt_spec busy =
 		GPIO_DT_SPEC_GET(ZEPHYR_USER_NODE, busy_gpios);
 
+	const struct gpio_dt_spec pw =
+		GPIO_DT_SPEC_GET(ZEPHYR_USER_NODE, epaper_gpios);
+
 	gpio_pin_configure_dt(&busy, GPIO_INPUT);
 	gpio_pin_configure_dt(&rst, GPIO_OUTPUT_ACTIVE);
+	gpio_pin_configure_dt(&pw, GPIO_OUTPUT_ACTIVE);
 }
 
 
@@ -96,14 +100,14 @@ void EPaper_Init(bool fullUpdate){
         EPD_1in9_Write_Screen(DSPNUM_1in9_off);
     }
 
-
     EPD_1in9_lut_DU_WB();
+    EPD_1in9_sleep();
 }
 
 int epaper_comm_init(const struct device *dev)
 {
     epaper_dev = ((struct epaper_config*)dev->config)->bus;
-    GPIOInit();
+    EPaper_GPIOInit();
     EPaper_Init(true);
     return (int)0;
 }
@@ -222,10 +226,26 @@ void EPD_1in9_Temperature()
 
 void EPD_1in9_sleep()
 {
-	EPD_1in9_ReadBusy();
     send_cmd(&epaper_dev, 0x28, adds_com);
 	EPD_1in9_ReadBusy();
-    send_cmd(&epaper_dev, 0xAC, adds_com);
+    send_cmd(&epaper_dev, 0xAD, adds_com);
+
+	const struct gpio_dt_spec pw =
+		GPIO_DT_SPEC_GET(ZEPHYR_USER_NODE, epaper_gpios);
+
+	gpio_pin_set_dt(&pw, 0);
+
+    LOG_DBG("e-Paper sleep");
+}
+
+void EPD_1in9_hardWakeUp()
+{
+	const struct gpio_dt_spec pw =
+		GPIO_DT_SPEC_GET(ZEPHYR_USER_NODE, epaper_gpios);
+
+	gpio_pin_set_dt(&pw, 1);
+
+	k_usleep(10 * 1000); //10ms
 }
 
 void EPD_1in9_ReadBusy(void)

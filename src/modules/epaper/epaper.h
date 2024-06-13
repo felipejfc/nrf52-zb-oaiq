@@ -42,7 +42,7 @@ extern unsigned char DSPNUM_1in9_W9[];
 #define EXTERNC
 #endif
 
-EXTERNC void GPIOInit(void);
+EXTERNC void EPaper_GPIOInit(void);
 EXTERNC void EPaper_Init(bool fullUpdate);
 EXTERNC void EPD_1in9_Reset(void);
 EXTERNC void EPD_1in9_ReadBusy();
@@ -55,6 +55,7 @@ EXTERNC void EPD_1in9_Write_Screen(unsigned char *image);
 EXTERNC void EPD_1in9_Set_TempHum(int16_t temp, uint16_t hum);
 EXTERNC void EPD_1in9_sleep();
 EXTERNC int epaper_comm_init(const struct device *dev);
+EXTERNC void EPD_1in9_hardWakeUp();
 #undef EXTERNC
 
 #endif

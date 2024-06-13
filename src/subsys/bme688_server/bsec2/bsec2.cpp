@@ -6,7 +6,11 @@
 #include "bsec_datatypes.h"
 #include "FieldAir_HandSanitizer/FieldAir_HandSanitizer.h"
 
-LOG_MODULE_REGISTER(bme688_bsec2, LOG_LEVEL_ERR);
+#ifdef CONFIG_LOG
+LOG_MODULE_REGISTER(bme688_bsec2, LOG_LEVEL_DBG);
+#else
+LOG_MODULE_REGISTER(bme688_bsec2, LOG_LEVEL_INF);
+#endif
 
 bsec_bme_settings_t bmeConf;
 bsec_output_t outputs[BSEC_NUMBER_OUTPUTS];
@@ -17,16 +21,29 @@ float extTempOffset = 0.0;
 uint32_t ovfCounter = 0;
 uint32_t lastMillis = 0;
 
+#ifdef CONFIG_LOG
 bsec_sensor_configuration_t virtualSensors[] = {
-    {BSEC_SAMPLE_RATE_LP,BSEC_OUTPUT_IAQ},
-    {BSEC_SAMPLE_RATE_LP,BSEC_OUTPUT_CO2_EQUIVALENT},
     {BSEC_SAMPLE_RATE_LP,BSEC_OUTPUT_RAW_PRESSURE},
     {BSEC_SAMPLE_RATE_LP,BSEC_OUTPUT_RAW_TEMPERATURE},
     {BSEC_SAMPLE_RATE_LP,BSEC_OUTPUT_RAW_HUMIDITY},
+    {BSEC_SAMPLE_RATE_LP,BSEC_OUTPUT_CO2_EQUIVALENT},
+    {BSEC_SAMPLE_RATE_LP,BSEC_OUTPUT_IAQ},
     {BSEC_SAMPLE_RATE_LP,BSEC_OUTPUT_BREATH_VOC_EQUIVALENT},
     {BSEC_SAMPLE_RATE_LP,BSEC_OUTPUT_STABILIZATION_STATUS},
     {BSEC_SAMPLE_RATE_LP,BSEC_OUTPUT_RUN_IN_STATUS}
 };
+#else
+bsec_sensor_configuration_t virtualSensors[] = {
+    {BSEC_SAMPLE_RATE_ULP,BSEC_OUTPUT_RAW_PRESSURE},
+    {BSEC_SAMPLE_RATE_ULP,BSEC_OUTPUT_RAW_TEMPERATURE},
+    {BSEC_SAMPLE_RATE_ULP,BSEC_OUTPUT_RAW_HUMIDITY},
+    {BSEC_SAMPLE_RATE_ULP,BSEC_OUTPUT_CO2_EQUIVALENT},
+    {BSEC_SAMPLE_RATE_ULP,BSEC_OUTPUT_IAQ},
+    {BSEC_SAMPLE_RATE_ULP,BSEC_OUTPUT_STABILIZATION_STATUS},
+    {BSEC_SAMPLE_RATE_ULP,BSEC_OUTPUT_RUN_IN_STATUS}
+    {BSEC_SAMPLE_RATE_ULP,BSEC_OUTPUT_BREATH_VOC_EQUIVALENT},
+};
+#endif
 
 void print_bme_conf(bsec_bme_settings_t &bmeConf){
     LOG_INF("   * next_call: %" PRId64 " process_data: %u",bmeConf.next_call,bmeConf.process_data);

@@ -42,7 +42,7 @@ void set_bme688_config(json &config){
 	std::string text = config.dump(4);
 	LOG_INF("%s",text.c_str());
 	bme688_heater_config_t heater_config;
-	heater_config.op_mode = BME68X_SEQUENTIAL_MODE;
+	heater_config.op_mode = BME68X_FORCED_MODE;
 	heater_config.heater_profile_len = config["temperatures"].size();
 	for(uint8_t i=0;i<heater_config.heater_profile_len;i++){
 		heater_config.heater_temperature_profile[i] = config["temperatures"][i];
