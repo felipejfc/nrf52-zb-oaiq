@@ -99,6 +99,14 @@ ZB_ZCL_DECLARE_REL_HUMIDITY_MEASUREMENT_ATTRIB_LIST(
 	&dev_ctx.humidity_attrs.max_measure_value
 	);
 
+ZB_ZCL_DECLARE_CARBON_DIOXIDE_ATTRIB_LIST(
+	carbon_dioxide_attr_list,
+	&dev_ctx.carbon_dioxide_attrs.measure_value,
+	&dev_ctx.carbon_dioxide_attrs.min_measure_value,
+	&dev_ctx.carbon_dioxide_attrs.max_measure_value,
+	&dev_ctx.carbon_dioxide_attrs.tolerance
+	);
+
 /* Clusters setup */
 ZB_HA_DECLARE_WEATHER_STATION_CLUSTER_LIST(
 	weather_station_cluster_list,
@@ -107,7 +115,8 @@ ZB_HA_DECLARE_WEATHER_STATION_CLUSTER_LIST(
 	identify_server_attr_list,
 	temperature_measurement_attr_list,
 	pressure_measurement_attr_list,
-	humidity_measurement_attr_list);
+	humidity_measurement_attr_list,
+	carbon_dioxide_attr_list);
 
 /* Endpoint setup (single) */
 ZB_HA_DECLARE_WEATHER_STATION_EP(
@@ -149,6 +158,12 @@ static void measurements_clusters_attr_init(void)
 	dev_ctx.humidity_attrs.measure_value = ZB_ZCL_ATTR_REL_HUMIDITY_MEASUREMENT_VALUE_UNKNOWN;
 	dev_ctx.humidity_attrs.min_measure_value = WEATHER_STATION_ATTR_HUMIDITY_MIN;
 	dev_ctx.humidity_attrs.max_measure_value = WEATHER_STATION_ATTR_HUMIDITY_MAX;
+
+	/* CO2 */
+	dev_ctx.carbon_dioxide_attrs.measure_value = ZB_ZCL_ATTR_CARBON_DIOXIDE_VALUE_UNKNOWN;
+	dev_ctx.carbon_dioxide_attrs.min_measure_value = 10 * ZCL_CARBON_DIOXIDE_MEASURED_VALUE_MULTIPLIER;
+	dev_ctx.carbon_dioxide_attrs.max_measure_value = 10000 * ZCL_CARBON_DIOXIDE_MEASURED_VALUE_MULTIPLIER;
+	dev_ctx.carbon_dioxide_attrs.tolerance = 90 * ZCL_CARBON_DIOXIDE_MEASURED_VALUE_MULTIPLIER;
 	/* Humidity measurements tolerance is not supported at the moment */
 }
 
@@ -292,7 +307,6 @@ void zboss_signal_handler(zb_bufid_t bufid)
 {
 	zb_zdo_app_signal_hdr_t *signal_header = NULL;
 	zb_zdo_app_signal_type_t signal = zb_get_app_signal(bufid, &signal_header);
-	zb_ret_t err = RET_OK;
 
 	/* Update network status LED but only for debug configuration */
 	#ifdef CONFIG_LOG

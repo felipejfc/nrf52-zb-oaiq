@@ -52,6 +52,13 @@ void bme688_handler(json &data){
 		LOG_ERR("Failed to update humidity: %d", err);
 	}
 
+	// Update the co2 attribute
+	float co2 = data["co2_eq"];
+	err = weather_station_update_co2(co2);
+	if (err) {
+		LOG_ERR("Failed to update co2: %d", err);
+	}
+
 	int64_t time_now = k_ticks_to_ms_near64(k_uptime_ticks());
 	if (time_now - last_display_update > 180000 || last_display_update == 0) {
 		EPD_1in9_hardWakeUp();

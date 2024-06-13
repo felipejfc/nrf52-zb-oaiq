@@ -21,6 +21,33 @@ int weather_station_init(void)
 	return err;
 }
 
+int weather_station_update_co2(float measured_co2)
+{
+	int err = 0;
+
+	float32_t co2_attribute = 0;
+
+	/* Convert measured value to attribute value, as specified in ZCL */
+	co2_attribute = (float32_t)(measured_co2 *
+									  ZCL_CARBON_DIOXIDE_MEASURED_VALUE_MULTIPLIER);
+	LOG_INF("Attribute C:%0.7f", co2_attribute);
+
+	/* Set ZCL attribute */
+	zb_zcl_status_t status = zb_zcl_set_attr_val(WEATHER_STATION_ENDPOINT_NB,
+												 ZB_ZCL_CLUSTER_ID_CARBON_DIOXIDE,
+												 ZB_ZCL_CLUSTER_SERVER_ROLE,
+												 ZB_ZCL_ATTR_CARBON_DIOXIDE_VALUE_ID,
+												 (zb_uint8_t *)&co2_attribute,
+												 ZB_FALSE);
+	if (status)
+	{
+		LOG_ERR("Failed to set ZCL attribute: %d", status);
+		err = status;
+	}
+
+	return err;
+}
+
 int weather_station_update_temperature(float measured_temperature)
 {
 	int err = 0;

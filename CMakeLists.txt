@@ -38,6 +38,7 @@ target_sources(app PRIVATE
   ${CMAKE_CURRENT_SOURCE_DIR}/src/sensor.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/reporting.c
   ${CMAKE_CURRENT_SOURCE_DIR}/src/pm/flash.c
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/zigbee/clusters.c
   ${CMAKE_CURRENT_SOURCE_DIR}/src/subsys/bme688_server/bme688_server.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/subsys/bme688_server/bsec2/bsec2.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/modules/bme688/bme688.c

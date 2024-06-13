@@ -10,6 +10,7 @@
 #include <zcl/zb_zcl_temp_measurement_addons.h>
 
 #include "sensor.h"
+#include "zigbee/clusters.h"
 
 /* Zigbee Cluster Library 4.4.2.2.1.1: MeasuredValue = 100x temperature in degrees Celsius */
 #define ZCL_TEMPERATURE_MEASUREMENT_MEASURED_VALUE_MULTIPLIER 100
@@ -52,12 +53,12 @@
 /* Temperature sensor device version */
 #define ZB_HA_DEVICE_VER_TEMPERATURE_SENSOR     0
 /* Basic, identify, temperature, pressure, humidity */
-#define ZB_HA_WEATHER_STATION_IN_CLUSTER_NUM    5
+#define ZB_HA_WEATHER_STATION_IN_CLUSTER_NUM    6
 /* Identify */
 #define ZB_HA_WEATHER_STATION_OUT_CLUSTER_NUM   1
 
-/* Temperature, pressure, humidity */
-#define ZB_HA_WEATHER_STATION_REPORT_ATTR_COUNT 3
+/* Temperature, pressure, humidity, iaq */
+#define ZB_HA_WEATHER_STATION_REPORT_ATTR_COUNT 4
 
 #define ZB_HA_DECLARE_WEATHER_STATION_CLUSTER_LIST(						\
 		cluster_list_name,								\
@@ -66,7 +67,8 @@
 		identify_server_attr_list,							\
 		temperature_measurement_attr_list,						\
 		pressure_measurement_attr_list,							\
-		humidity_measurement_attr_list							\
+		humidity_measurement_attr_list,							\
+		carbon_dioxide_attr_list							\
 		)										\
 	zb_zcl_cluster_desc_t cluster_list_name[] =						\
 	{											\
@@ -106,6 +108,13 @@
 			ZB_ZCL_MANUF_CODE_INVALID						\
 			),									\
 		ZB_ZCL_CLUSTER_DESC(								\
+			ZB_ZCL_CLUSTER_ID_CARBON_DIOXIDE,				\
+			ZB_ZCL_ARRAY_SIZE(carbon_dioxide_attr_list, zb_zcl_attr_t),	\
+			(carbon_dioxide_attr_list),					\
+			ZB_ZCL_CLUSTER_SERVER_ROLE,						\
+			ZB_ZCL_MANUF_CODE_INVALID						\
+			),									\
+		ZB_ZCL_CLUSTER_DESC(								\
 			ZB_ZCL_CLUSTER_ID_IDENTIFY,						\
 			ZB_ZCL_ARRAY_SIZE(identify_client_attr_list, zb_zcl_attr_t),		\
 			(identify_client_attr_list),						\
@@ -135,6 +144,7 @@
 			ZB_ZCL_CLUSTER_ID_TEMP_MEASUREMENT,				\
 			ZB_ZCL_CLUSTER_ID_PRESSURE_MEASUREMENT,				\
 			ZB_ZCL_CLUSTER_ID_REL_HUMIDITY_MEASUREMENT,			\
+			ZB_ZCL_CLUSTER_ID_CARBON_DIOXIDE,			\
 			ZB_ZCL_CLUSTER_ID_IDENTIFY,					\
 		}									\
 	}
@@ -172,12 +182,26 @@ struct zb_zcl_humidity_measurement_attrs_t {
 	zb_int16_t max_measure_value;
 };
 
+struct zb_zcl_analog_output_attrs_t {
+	zb_int16_t present_value;
+	zb_int16_t min_present_value;
+	zb_int16_t max_present_value;
+};
+
+struct zb_zcl_carbon_dioxide_attrs_t {
+	zb_uint32_t measure_value;
+	zb_uint32_t min_measure_value;
+	zb_uint32_t max_measure_value;
+	zb_uint32_t tolerance;
+};
+
 struct zb_device_ctx {
 	zb_zcl_basic_attrs_t basic_attr;
 	zb_zcl_identify_attrs_t identify_attr;
 	zb_zcl_temp_measurement_attrs_t temp_attrs;
 	struct zb_zcl_pressure_measurement_attrs_t pres_attrs;
 	struct zb_zcl_humidity_measurement_attrs_t humidity_attrs;
+	struct zb_zcl_carbon_dioxide_attrs_t carbon_dioxide_attrs;
 };
 
 /**
@@ -204,6 +228,14 @@ int weather_station_check_weather(void);
 #else
 #define EXTERNC
 #endif
+
+/**
+ * @brief Updates ZCL carbon dioxide attribute using value obtained during last weather check.
+ *
+ * @return 0 if success, error code if failure.
+ */
+EXTERNC int weather_station_update_co2(float measured_co2);
+
 /**
  * @brief Updates ZCL temperature attribute using value obtained during last weather check.
  *
