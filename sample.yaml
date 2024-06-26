@@ -2,15 +2,15 @@ sample:
   name: Zigbee Weather Station
   description: Zigbee Weather Station application
 tests:
-  applications.zigbee_weather_station:
+  applications.nrf52_zb_oaiq:
     build_only: true
-    platform_allow: thingy53_nrf5340_cpuapp
+    platform_allow: xiao_ble
     tags: ci_build
     extra_args: CONF_FILE=prj_release.conf
     integration_platforms:
-      - thingy53_nrf5340_cpuapp
-  applications.zigbee_weather_station.debug:
+      - xiao_ble
+  applications.nrf52_zb_oaiq.debug:
     build_only: true
-    platform_allow: thingy53_nrf5340_cpuapp
+    platform_allow: xiao_ble
     tags: ci_build debug
     extra_args: CONF_FILE=prj.conf

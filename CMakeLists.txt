@@ -17,7 +17,7 @@ endmacro()
 
 find_package(Zephyr REQUIRED HINTS $ENV{ZEPHYR_BASE})
 
-project(zigbee_weather_station)
+project(nrf52_zb_oaiq)
 
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/modules/bme688)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/subsys/bme688_server)

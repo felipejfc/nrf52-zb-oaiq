@@ -24,6 +24,6 @@ config FIRST_WEATHER_CHECK_DELAY_SECONDS
 
 source "Kconfig.zephyr"
 
-module = ZIGBEE_WEATHER_STATION
-module-str = Zigbee weather station
+module = NRF52_ZB_OAIQ
+module-str = nRF52 ZB OAIQ
 source "subsys/logging/Kconfig.template.log_config"

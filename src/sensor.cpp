@@ -22,7 +22,7 @@ using namespace nlohmann;
  */
 #define SENSOR_VAL2_DIVISOR 1000000
 
-LOG_MODULE_DECLARE(app, CONFIG_ZIGBEE_WEATHER_STATION_LOG_LEVEL);
+LOG_MODULE_DECLARE(app, CONFIG_NRF52_ZB_OAIQ_LOG_LEVEL);
 
 static const struct device *sensor;
 

@@ -57,7 +57,7 @@
 BUILD_ASSERT(DT_NODE_HAS_COMPAT(DT_CHOSEN(zephyr_console),
 				zephyr_cdc_acm_uart),
 	     "Console device is not ACM CDC UART device");
-LOG_MODULE_REGISTER(app, CONFIG_ZIGBEE_WEATHER_STATION_LOG_LEVEL);
+LOG_MODULE_REGISTER(app, CONFIG_NRF52_ZB_OAIQ_LOG_LEVEL);
 
 /* Stores all cluster-related attributes */
 static struct zb_device_ctx dev_ctx;

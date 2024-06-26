@@ -8,7 +8,7 @@
 
 #include "reporting.h"
 
-LOG_MODULE_DECLARE(app, CONFIG_ZIGBEE_WEATHER_STATION_LOG_LEVEL);
+LOG_MODULE_DECLARE(app, CONFIG_NRF52_ZB_OAIQ_LOG_LEVEL);
 
 int weather_station_init(void)
 {

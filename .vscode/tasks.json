@@ -9,7 +9,7 @@
 			},
 			"args": [
 				"load",
-                "C:\\Users\\fjfca\\dev\\home\\nordic\\zigbee_weather_station_1\\build\\zephyr\\merged.hex",
+                "C:\\Users\\fjfca\\dev\\home\\nordic\\nrf52_zb_oaiq\\build\\zephyr\\merged.hex",
                 "--target",
                 "nrf52840",
                 "--frequency",
