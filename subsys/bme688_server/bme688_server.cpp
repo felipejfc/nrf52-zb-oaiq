@@ -19,7 +19,7 @@ LOG_MODULE_REGISTER(bme688_server, LOG_LEVEL_DBG);
 
 #define BME688_SERVICE_STACK_SIZE 8192
 #define BME688_SERVICE_PRIORITY 30
-#define BME688_SERVICE_START_DELAY_MS 100
+#define BME688_SERVICE_START_DELAY_MS 3000
 
 json user_data = nullptr;
 int measure_count = 0;
@@ -34,6 +34,7 @@ K_THREAD_DEFINE(	bme688_thread, BME688_SERVICE_STACK_SIZE, bme688_service_bsec2,
 
 const struct device *const dev = DEVICE_DT_GET_ONE(bosch_bme688);
 static bme688_handler_t m_bme688_server_handler = NULL;
+static bme688_pre_work_handler_t m_bme_server_pre_work_handler = NULL;
 static bool started = false;
 uint8_t bme688_mode = BME68X_SLEEP_MODE;//BME68X_FORCED_MODE, BME68X_PARALLEL_MODE, BME68X_SEQUENTIAL_MODE
 
@@ -52,7 +53,7 @@ void set_bme688_config(json &config){
 	bme688_set_heater_config(&heater_config);
 }
 
-void start_bme688(bme688_handler_t handler){
+void start_bme688(bme688_handler_t handler, bme688_pre_work_handler_t pre_work_handler){
 	LOG_INF("start_bme688()");
 
 	if (!device_is_ready(dev)) {
@@ -67,6 +68,7 @@ void start_bme688(bme688_handler_t handler){
 
 	LOG_INF("set_bme688_handler()");
 	m_bme688_server_handler = handler;
+	m_bme_server_pre_work_handler = pre_work_handler;
 
 	started = true;
 }
@@ -226,6 +228,10 @@ void bme688_service_bsec2(){
 	bsec_bme_settings_t conf;
 	bsec2_get_conf(conf);
 	while(true){
+		if (m_bme_server_pre_work_handler != NULL)
+		{
+			m_bme_server_pre_work_handler();
+		}
 		if((conf.op_mode == BME68X_FORCED_MODE) || (conf.op_mode != bme688_mode)){
 			bme688_mode = conf.op_mode;
 			set_conf(conf);

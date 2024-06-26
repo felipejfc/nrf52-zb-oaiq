@@ -245,7 +245,7 @@ void EPD_1in9_hardWakeUp()
 
 	gpio_pin_set_dt(&pw, 1);
 
-	k_usleep(10 * 1000); //10ms
+	k_usleep(100 * 1000); //10ms
 }
 
 void EPD_1in9_ReadBusy(void)
@@ -265,7 +265,7 @@ void EPD_1in9_ReadBusy(void)
     LOG_DBG("e-Paper busy release");
 }
 
-void EPD_1in9_Set_TempHum(int16_t temp, uint16_t hum){
+void EPD_1in9_Set_TempHumPow(int16_t temp, uint16_t hum, bool lowPower){
     unsigned char image[15] = {0};
     uint8_t numbers[10][2] = {
         {0xbf, 0x1f}, // 0
@@ -297,6 +297,6 @@ void EPD_1in9_Set_TempHum(int16_t temp, uint16_t hum){
     int num2hum = floor((hum % 100) / 10.0f);
     image[9] = numbers[num2hum][0];
     image[10] = numbers[num2hum][1] | 1 << 5;
-    image[13] = 0x05 | 1 << 3 | 1 << 4;
+    image[13] = 0x05 | 1 << 3 | lowPower << 4;
     EPD_1in9_Write_Screen(&image);
 }

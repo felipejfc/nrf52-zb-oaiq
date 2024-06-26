@@ -19,15 +19,16 @@ find_package(Zephyr REQUIRED HINTS $ENV{ZEPHYR_BASE})
 
 project(zigbee_weather_station)
 
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/src/modules/bme688)
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/src/subsys/bme688_server)
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/src/subsys/app_flash)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/modules/bme688)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/subsys/bme688_server)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/subsys/app_flash)
 
 #include dirs
-zephyr_include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src/modules/bme688)
-zephyr_include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src/subsys/bme688_server)
-zephyr_include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src/subsys/app_flash)
-zephyr_include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src/modules/epaper)
+zephyr_include_directories(${CMAKE_CURRENT_SOURCE_DIR}/modules/bme688)
+zephyr_include_directories(${CMAKE_CURRENT_SOURCE_DIR}/modules/xiao_sense_nrf52840_battery_lib/src/battery)
+zephyr_include_directories(${CMAKE_CURRENT_SOURCE_DIR}/modules/epaper)
+zephyr_include_directories(${CMAKE_CURRENT_SOURCE_DIR}/subsys/bme688_server)
+zephyr_include_directories(${CMAKE_CURRENT_SOURCE_DIR}/subsys/app_flash)
 zephyr_include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 ################################################################################
@@ -39,13 +40,14 @@ target_sources(app PRIVATE
   ${CMAKE_CURRENT_SOURCE_DIR}/src/reporting.c
   ${CMAKE_CURRENT_SOURCE_DIR}/src/pm/flash.c
   ${CMAKE_CURRENT_SOURCE_DIR}/src/zigbee/clusters.c
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/subsys/bme688_server/bme688_server.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/subsys/bme688_server/bsec2/bsec2.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/modules/bme688/bme688.c
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/subsys/app_flash/flash_settings_storage.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/subsys/bme688_server/bme688_server.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/subsys/bme688_server/bsec2/bsec2.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/subsys/app_flash/flash_settings_storage.cpp
   #epaper
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/modules/epaper/epaper.c
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/modules/epaper/epaper_comm.c
+  ${CMAKE_CURRENT_SOURCE_DIR}/modules/epaper/epaper.c
+  ${CMAKE_CURRENT_SOURCE_DIR}/modules/epaper/epaper_comm.c
+  ${CMAKE_CURRENT_SOURCE_DIR}/modules/bme688/bme688.c
+  ${CMAKE_CURRENT_SOURCE_DIR}/modules/xiao_sense_nrf52840_battery_lib/src/battery/battery.c
 )
 
 # NORDIC SDK APP END

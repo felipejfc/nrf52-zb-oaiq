@@ -21,6 +21,66 @@ int weather_station_init(void)
 	return err;
 }
 
+int weather_station_update_aiq(float voc, float iaq, uint16_t bat_millivolt)
+{
+	int err = 0;
+
+	uint16_t voc_attribute = 0;
+	uint16_t iaq_attribute = 0;
+
+	/* Convert measured value to attribute value, as specified in ZCL */
+	voc_attribute = (uint16_t)(voc *
+									  ZCL_AIQ_MEASURED_VALUE_MULTIPLIER);
+	LOG_INF("Attribute V:%10d", voc_attribute);
+
+	/* Convert measured value to attribute value, as specified in ZCL */
+	iaq_attribute = (uint16_t)(iaq *
+									  ZCL_AIQ_MEASURED_VALUE_MULTIPLIER);
+	LOG_INF("Attribute I:%10d", iaq_attribute);
+	LOG_INF("Attribute B:%10d", bat_millivolt);
+
+	/* Set ZCL attribute */
+	zb_zcl_status_t status = zb_zcl_set_attr_val(WEATHER_STATION_ENDPOINT_NB,
+												 ZB_ZCL_CLUSTER_ID_AIQ,
+												 ZB_ZCL_CLUSTER_SERVER_ROLE,
+												 ZB_ZCL_ATTR_AIQ_VOC_ID,
+												 (zb_uint8_t *)&voc_attribute,
+												 ZB_FALSE);
+	if (status)
+	{
+		LOG_ERR("Failed to set ZCL attribute: %d", status);
+		err = status;
+	}
+
+	/* Set ZCL attribute */
+	status = zb_zcl_set_attr_val(WEATHER_STATION_ENDPOINT_NB,
+												 ZB_ZCL_CLUSTER_ID_AIQ,
+												 ZB_ZCL_CLUSTER_SERVER_ROLE,
+												 ZB_ZCL_ATTR_AIQ_IAQ_ID,
+												 (zb_uint8_t *)&iaq_attribute,
+												 ZB_FALSE);
+	if (status)
+	{
+		LOG_ERR("Failed to set ZCL attribute: %d", status);
+		err = status;
+	}
+
+/* Set ZCL attribute */
+	status = zb_zcl_set_attr_val(WEATHER_STATION_ENDPOINT_NB,
+												 ZB_ZCL_CLUSTER_ID_AIQ,
+												 ZB_ZCL_CLUSTER_SERVER_ROLE,
+												 ZB_ZCL_ATTR_AIQ_BAT_ID,
+												 (zb_uint8_t *)&bat_millivolt,
+												 ZB_FALSE);
+	if (status)
+	{
+		LOG_ERR("Failed to set ZCL attribute: %d", status);
+		err = status;
+	}
+
+	return err;
+}
+
 int weather_station_update_co2(float measured_co2)
 {
 	int err = 0;
@@ -30,7 +90,7 @@ int weather_station_update_co2(float measured_co2)
 	/* Convert measured value to attribute value, as specified in ZCL */
 	co2_attribute = (float32_t)(measured_co2 *
 									  ZCL_CARBON_DIOXIDE_MEASURED_VALUE_MULTIPLIER);
-	LOG_INF("Attribute C:%0.7f", co2_attribute);
+	LOG_INF("Attribute C:%10.7f", co2_attribute);
 
 	/* Set ZCL attribute */
 	zb_zcl_status_t status = zb_zcl_set_attr_val(WEATHER_STATION_ENDPOINT_NB,

@@ -62,10 +62,17 @@ LOG_MODULE_REGISTER(app, CONFIG_ZIGBEE_WEATHER_STATION_LOG_LEVEL);
 /* Stores all cluster-related attributes */
 static struct zb_device_ctx dev_ctx;
 
+char modelid[] = {10, 'n', 'R', 'F', '5', '2', '.', 'O', 'A', 'I', 'Q'};
+char manufname[] = {6, 'N', 'o', 'r', 'd', 'i', 'c'};
+
 /* Attributes setup */
-ZB_ZCL_DECLARE_BASIC_ATTRIB_LIST(
+ZB_ZCL_DECLARE_BASIC_ATTRIB_LIST_WITH_MODEL_MANUF(
 	basic_attr_list,
-	&dev_ctx.basic_attr.zcl_version, &dev_ctx.basic_attr.power_source);
+	&dev_ctx.basic_attr.zcl_version, 
+	&dev_ctx.basic_attr.power_source,
+	&modelid[0],
+	&manufname[0]
+	);
 
 /* Declare attribute list for Identify cluster (client). */
 ZB_ZCL_DECLARE_IDENTIFY_CLIENT_ATTRIB_LIST(
@@ -107,6 +114,13 @@ ZB_ZCL_DECLARE_CARBON_DIOXIDE_ATTRIB_LIST(
 	&dev_ctx.carbon_dioxide_attrs.tolerance
 	);
 
+ZB_ZCL_DECLARE_AIQ_ATTRIB_LIST(
+	aiq_attr_list,
+	&dev_ctx.aiq_attrs.iaq,
+	&dev_ctx.aiq_attrs.voc,
+	&dev_ctx.aiq_attrs.bat
+	);
+
 /* Clusters setup */
 ZB_HA_DECLARE_WEATHER_STATION_CLUSTER_LIST(
 	weather_station_cluster_list,
@@ -116,7 +130,8 @@ ZB_HA_DECLARE_WEATHER_STATION_CLUSTER_LIST(
 	temperature_measurement_attr_list,
 	pressure_measurement_attr_list,
 	humidity_measurement_attr_list,
-	carbon_dioxide_attr_list);
+	carbon_dioxide_attr_list,
+	aiq_attr_list);
 
 /* Endpoint setup (single) */
 ZB_HA_DECLARE_WEATHER_STATION_EP(
@@ -164,7 +179,11 @@ static void measurements_clusters_attr_init(void)
 	dev_ctx.carbon_dioxide_attrs.min_measure_value = 10 * ZCL_CARBON_DIOXIDE_MEASURED_VALUE_MULTIPLIER;
 	dev_ctx.carbon_dioxide_attrs.max_measure_value = 10000 * ZCL_CARBON_DIOXIDE_MEASURED_VALUE_MULTIPLIER;
 	dev_ctx.carbon_dioxide_attrs.tolerance = 90 * ZCL_CARBON_DIOXIDE_MEASURED_VALUE_MULTIPLIER;
-	/* Humidity measurements tolerance is not supported at the moment */
+
+	/* AIQ */
+	dev_ctx.aiq_attrs.iaq = ZB_ZCL_ATTR_AIQ_VALUE_UNKNOWN;
+	dev_ctx.aiq_attrs.voc = ZB_ZCL_ATTR_AIQ_VALUE_UNKNOWN;
+	dev_ctx.aiq_attrs.bat = ZB_ZCL_ATTR_AIQ_VALUE_UNKNOWN;
 }
 
 static void toggle_identify_led(zb_bufid_t bufid)

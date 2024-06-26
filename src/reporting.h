@@ -10,7 +10,8 @@
 #include <zcl/zb_zcl_temp_measurement_addons.h>
 
 #include "sensor.h"
-#include "zigbee/clusters.h"
+#include "zigbee/co2.h"
+#include "zigbee/aiq.h"
 
 /* Zigbee Cluster Library 4.4.2.2.1.1: MeasuredValue = 100x temperature in degrees Celsius */
 #define ZCL_TEMPERATURE_MEASUREMENT_MEASURED_VALUE_MULTIPLIER 100
@@ -52,13 +53,13 @@
 
 /* Temperature sensor device version */
 #define ZB_HA_DEVICE_VER_TEMPERATURE_SENSOR     0
-/* Basic, identify, temperature, pressure, humidity */
-#define ZB_HA_WEATHER_STATION_IN_CLUSTER_NUM    6
+/* Basic, identify, temperature, pressure, humidity, co2, aiq */
+#define ZB_HA_WEATHER_STATION_IN_CLUSTER_NUM    7
 /* Identify */
 #define ZB_HA_WEATHER_STATION_OUT_CLUSTER_NUM   1
 
-/* Temperature, pressure, humidity, iaq */
-#define ZB_HA_WEATHER_STATION_REPORT_ATTR_COUNT 4
+/* Temperature, pressure, humidity, co2, aiq, voc, bat */
+#define ZB_HA_WEATHER_STATION_REPORT_ATTR_COUNT 7
 
 #define ZB_HA_DECLARE_WEATHER_STATION_CLUSTER_LIST(						\
 		cluster_list_name,								\
@@ -68,7 +69,8 @@
 		temperature_measurement_attr_list,						\
 		pressure_measurement_attr_list,							\
 		humidity_measurement_attr_list,							\
-		carbon_dioxide_attr_list							\
+		carbon_dioxide_attr_list,							\
+		aiq_attr_list							\
 		)										\
 	zb_zcl_cluster_desc_t cluster_list_name[] =						\
 	{											\
@@ -115,6 +117,13 @@
 			ZB_ZCL_MANUF_CODE_INVALID						\
 			),									\
 		ZB_ZCL_CLUSTER_DESC(								\
+			ZB_ZCL_CLUSTER_ID_AIQ,				\
+			ZB_ZCL_ARRAY_SIZE(aiq_attr_list, zb_zcl_attr_t),	\
+			(aiq_attr_list),					\
+			ZB_ZCL_CLUSTER_SERVER_ROLE,						\
+			ZB_ZCL_MANUF_CODE_INVALID						\
+			),									\
+		ZB_ZCL_CLUSTER_DESC(								\
 			ZB_ZCL_CLUSTER_ID_IDENTIFY,						\
 			ZB_ZCL_ARRAY_SIZE(identify_client_attr_list, zb_zcl_attr_t),		\
 			(identify_client_attr_list),						\
@@ -145,6 +154,7 @@
 			ZB_ZCL_CLUSTER_ID_PRESSURE_MEASUREMENT,				\
 			ZB_ZCL_CLUSTER_ID_REL_HUMIDITY_MEASUREMENT,			\
 			ZB_ZCL_CLUSTER_ID_CARBON_DIOXIDE,			\
+			ZB_ZCL_CLUSTER_ID_AIQ,			\
 			ZB_ZCL_CLUSTER_ID_IDENTIFY,					\
 		}									\
 	}
@@ -168,6 +178,14 @@
 		cluster_list,									\
 		(zb_af_simple_desc_1_1_t *)&simple_desc_##ep_name,				\
 		ZB_HA_WEATHER_STATION_REPORT_ATTR_COUNT, reporting_info##ep_name, 0, NULL)
+
+#define ZB_ZCL_DECLARE_BASIC_ATTRIB_LIST_WITH_MODEL_MANUF(attr_list, zcl_version, power_source, model_id, manufacturer_name) \
+    ZB_ZCL_START_DECLARE_ATTRIB_LIST_CLUSTER_REVISION(attr_list, ZB_ZCL_BASIC) \
+    ZB_ZCL_SET_ATTR_DESC(ZB_ZCL_ATTR_BASIC_ZCL_VERSION_ID, (zcl_version))      \
+    ZB_ZCL_SET_ATTR_DESC(ZB_ZCL_ATTR_BASIC_POWER_SOURCE_ID, (power_source))    \
+    ZB_ZCL_SET_ATTR_DESC(ZB_ZCL_ATTR_BASIC_MANUFACTURER_NAME_ID, (manufacturer_name))\
+    ZB_ZCL_SET_ATTR_DESC(ZB_ZCL_ATTR_BASIC_MODEL_IDENTIFIER_ID, (model_id))         \
+    ZB_ZCL_FINISH_DECLARE_ATTRIB_LIST
 
 struct zb_zcl_pressure_measurement_attrs_t {
 	zb_int16_t measure_value;
@@ -195,6 +213,12 @@ struct zb_zcl_carbon_dioxide_attrs_t {
 	zb_uint32_t tolerance;
 };
 
+struct zb_zcl_aiq_attrs_t {
+	zb_uint16_t iaq;
+	zb_uint16_t voc;
+	zb_uint16_t bat;
+};
+
 struct zb_device_ctx {
 	zb_zcl_basic_attrs_t basic_attr;
 	zb_zcl_identify_attrs_t identify_attr;
@@ -202,6 +226,7 @@ struct zb_device_ctx {
 	struct zb_zcl_pressure_measurement_attrs_t pres_attrs;
 	struct zb_zcl_humidity_measurement_attrs_t humidity_attrs;
 	struct zb_zcl_carbon_dioxide_attrs_t carbon_dioxide_attrs;
+	struct zb_zcl_aiq_attrs_t aiq_attrs;
 };
 
 /**
@@ -256,6 +281,13 @@ EXTERNC int weather_station_update_pressure(float measured_pressure);
  * @return 0 if success, error code if failure.
  */
 EXTERNC int weather_station_update_humidity(float measured_humidity);
+
+/**
+ * @brief Updates ZCL air quality attributes using values obtained during last weather check.
+ *
+ * @return 0 if success, error code if failure.
+ */
+EXTERNC int weather_station_update_aiq(float measured_voc, float measured_iaq, uint16_t bat_millivolt);
 #undef EXTERNC
 
 #endif /* REPORTING_H */

@@ -52,7 +52,7 @@ EXTERNC void EPD_1in9_lut_5S();
 EXTERNC void EPD_1in9_Temperature();
 EXTERNC int  EPD_1in9_init();
 EXTERNC void EPD_1in9_Write_Screen(unsigned char *image);
-EXTERNC void EPD_1in9_Set_TempHum(int16_t temp, uint16_t hum);
+EXTERNC void EPD_1in9_Set_TempHumPow(int16_t temp, uint16_t hum, bool lowPower);
 EXTERNC void EPD_1in9_sleep();
 EXTERNC int epaper_comm_init(const struct device *dev);
 EXTERNC void EPD_1in9_hardWakeUp();
