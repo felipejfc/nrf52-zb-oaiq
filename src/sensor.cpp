@@ -80,7 +80,12 @@ void bme688_handler(json &data){
 
 	LOG_INF("Battery at %d mV (capacity %d%%)", battery_millivolt, battery_percentage);
 
-	err = weather_station_update_aiq(voc, iaq, battery_millivolt);
+	err = weather_station_update_battery(battery_percentage);
+	if (err) {
+		LOG_ERR("Failed to update battery: %d", err);
+	}
+
+	err = weather_station_update_aiq(voc, iaq);
 	if (err) {
 		LOG_ERR("Failed to update aiq: %d", err);
 	}

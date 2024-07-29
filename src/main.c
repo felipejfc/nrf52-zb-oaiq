@@ -114,11 +114,19 @@ ZB_ZCL_DECLARE_CARBON_DIOXIDE_ATTRIB_LIST(
 	&dev_ctx.carbon_dioxide_attrs.tolerance
 	);
 
+ZB_ZCL_DECLARE_POWER_CONFIG_BATTERY_ATTRIB_LIST(
+	power_config_battery_attr_list,
+	&dev_ctx.power_config_battery_attrs.voltage,
+	&dev_ctx.power_config_battery_attrs.rated_voltage,
+	&dev_ctx.power_config_battery_attrs.alarm_mask,
+	&dev_ctx.power_config_battery_attrs.voltage_min_threshold,
+	&dev_ctx.power_config_battery_attrs.percentage_remaining
+	);
+
 ZB_ZCL_DECLARE_AIQ_ATTRIB_LIST(
 	aiq_attr_list,
 	&dev_ctx.aiq_attrs.iaq,
-	&dev_ctx.aiq_attrs.voc,
-	&dev_ctx.aiq_attrs.bat
+	&dev_ctx.aiq_attrs.voc
 	);
 
 /* Clusters setup */
@@ -131,7 +139,8 @@ ZB_HA_DECLARE_WEATHER_STATION_CLUSTER_LIST(
 	pressure_measurement_attr_list,
 	humidity_measurement_attr_list,
 	carbon_dioxide_attr_list,
-	aiq_attr_list);
+	aiq_attr_list,
+	power_config_battery_attr_list);
 
 /* Endpoint setup (single) */
 ZB_HA_DECLARE_WEATHER_STATION_EP(
@@ -183,7 +192,14 @@ static void measurements_clusters_attr_init(void)
 	/* AIQ */
 	dev_ctx.aiq_attrs.iaq = ZB_ZCL_ATTR_AIQ_VALUE_UNKNOWN;
 	dev_ctx.aiq_attrs.voc = ZB_ZCL_ATTR_AIQ_VALUE_UNKNOWN;
-	dev_ctx.aiq_attrs.bat = ZB_ZCL_ATTR_AIQ_VALUE_UNKNOWN;
+
+	/* Power Config Battery */
+	dev_ctx.power_config_battery_attrs.rated_voltage = ZB_ZCL_POWER_CONFIG_BATTERY_VOLTAGE_INVALID;
+	dev_ctx.power_config_battery_attrs.alarm_mask = ZB_ZCL_POWER_CONFIG_BATTERY_ALARM_MASK_DEFAULT_VALUE;
+	dev_ctx.power_config_battery_attrs.voltage_min_threshold = 3000;
+	dev_ctx.power_config_battery_attrs.percentage_remaining = ZB_ZCL_POWER_CONFIG_BATTERY_REMAINING_UNKNOWN;
+	dev_ctx.power_config_battery_attrs.voltage = ZB_ZCL_POWER_CONFIG_BATTERY_VOLTAGE_INVALID;
+
 }
 
 static void toggle_identify_led(zb_bufid_t bufid)
@@ -335,13 +351,8 @@ void zboss_signal_handler(zb_bufid_t bufid)
 	/* Detect ZBOSS startup */
 	switch (signal) {
 	case ZB_ZDO_SIGNAL_SKIP_STARTUP:
-		/* ZBOSS framework has started - schedule first weather check */
-		/*
-		err = ZB_SCHEDULE_APP_ALARM(check_weather,
-					    0,
-					    ZB_MILLISECONDS_TO_BEACON_INTERVAL(
-						    WEATHER_CHECK_INITIAL_DELAY_MSEC));
-		*/
+		/* ZBOSS framework has started - configure reporting */
+		break;
 	case ZB_COMMON_SIGNAL_CAN_SLEEP:
 		/* Zigbee stack can enter sleep mode */
 		zb_sleep_now();

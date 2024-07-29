@@ -15,6 +15,8 @@
 
 /* Zigbee Cluster Library 4.4.2.2.1.1: MeasuredValue = 100x temperature in degrees Celsius */
 #define ZCL_TEMPERATURE_MEASUREMENT_MEASURED_VALUE_MULTIPLIER 100
+#define ZCL_BATTERY_VOLTAGE_MEASUREMENT_MULTIPLIER 0.01
+#define ZCL_BATTERY_PERCENTAGE_REMAINING_MULTIPLIER 2
 #define ZCL_PRESSURE_MEASUREMENT_MEASURED_VALUE_MULTIPLIER 1
 /* Zigbee Cluster Library 4.7.2.1.1: MeasuredValue = 100x water content in % */
 #define ZCL_HUMIDITY_MEASUREMENT_MEASURED_VALUE_MULTIPLIER 100
@@ -53,12 +55,12 @@
 
 /* Temperature sensor device version */
 #define ZB_HA_DEVICE_VER_TEMPERATURE_SENSOR     0
-/* Basic, identify, temperature, pressure, humidity, co2, aiq */
-#define ZB_HA_WEATHER_STATION_IN_CLUSTER_NUM    7
+/* Basic, identify, temperature, pressure, humidity, co2, aiq, power config */
+#define ZB_HA_WEATHER_STATION_IN_CLUSTER_NUM    8
 /* Identify */
 #define ZB_HA_WEATHER_STATION_OUT_CLUSTER_NUM   1
 
-/* Temperature, pressure, humidity, co2, aiq, voc, bat */
+/* Temperature, pressure, humidity, co2, aiq, voc, bat% */
 #define ZB_HA_WEATHER_STATION_REPORT_ATTR_COUNT 7
 
 #define ZB_HA_DECLARE_WEATHER_STATION_CLUSTER_LIST(						\
@@ -70,7 +72,8 @@
 		pressure_measurement_attr_list,							\
 		humidity_measurement_attr_list,							\
 		carbon_dioxide_attr_list,							\
-		aiq_attr_list							\
+		aiq_attr_list,									\
+		power_config_battery_attr_list							\
 		)										\
 	zb_zcl_cluster_desc_t cluster_list_name[] =						\
 	{											\
@@ -130,6 +133,13 @@
 			ZB_ZCL_CLUSTER_CLIENT_ROLE,						\
 			ZB_ZCL_MANUF_CODE_INVALID						\
 			),									\
+		ZB_ZCL_CLUSTER_DESC(								\
+			ZB_ZCL_CLUSTER_ID_POWER_CONFIG,				\
+			ZB_ZCL_ARRAY_SIZE(power_config_battery_attr_list, zb_zcl_attr_t),	\
+			(power_config_battery_attr_list),					\
+			ZB_ZCL_CLUSTER_SERVER_ROLE,						\
+			ZB_ZCL_MANUF_CODE_INVALID						\
+			),									\
 	}
 
 #define ZB_ZCL_DECLARE_WEATHER_STATION_DESC(						\
@@ -155,6 +165,7 @@
 			ZB_ZCL_CLUSTER_ID_REL_HUMIDITY_MEASUREMENT,			\
 			ZB_ZCL_CLUSTER_ID_CARBON_DIOXIDE,			\
 			ZB_ZCL_CLUSTER_ID_AIQ,			\
+			ZB_ZCL_CLUSTER_ID_POWER_CONFIG,			\
 			ZB_ZCL_CLUSTER_ID_IDENTIFY,					\
 		}									\
 	}
@@ -187,6 +198,15 @@
     ZB_ZCL_SET_ATTR_DESC(ZB_ZCL_ATTR_BASIC_MODEL_IDENTIFIER_ID, (model_id))         \
     ZB_ZCL_FINISH_DECLARE_ATTRIB_LIST
 
+#define ZB_ZCL_DECLARE_POWER_CONFIG_BATTERY_ATTRIB_LIST(attr_list, voltage, rated_voltage, alarm_mask, voltage_min_threshold, percentage_remaining) \
+ ZB_ZCL_START_DECLARE_ATTRIB_LIST_CLUSTER_REVISION(attr_list, ZB_ZCL_POWER_CONFIG) \
+ ZB_SET_ATTR_DESCR_WITH_ZB_ZCL_ATTR_POWER_CONFIG_BATTERY_VOLTAGE_ID(voltage, ), \
+ ZB_SET_ATTR_DESCR_WITH_ZB_ZCL_ATTR_POWER_CONFIG_BATTERY_RATED_VOLTAGE_ID(rated_voltage, ), \
+ ZB_SET_ATTR_DESCR_WITH_ZB_ZCL_ATTR_POWER_CONFIG_BATTERY_ALARM_MASK_ID(alarm_mask, ), \
+ ZB_SET_ATTR_DESCR_WITH_ZB_ZCL_ATTR_POWER_CONFIG_BATTERY_VOLTAGE_MIN_THRESHOLD_ID(voltage_min_threshold, ), \
+ ZB_SET_ATTR_DESCR_WITH_ZB_ZCL_ATTR_POWER_CONFIG_BATTERY_PERCENTAGE_REMAINING_ID(percentage_remaining, ), \
+ ZB_ZCL_FINISH_DECLARE_ATTRIB_LIST
+
 struct zb_zcl_pressure_measurement_attrs_t {
 	zb_int16_t measure_value;
 	zb_int16_t min_measure_value;
@@ -216,7 +236,14 @@ struct zb_zcl_carbon_dioxide_attrs_t {
 struct zb_zcl_aiq_attrs_t {
 	zb_uint16_t iaq;
 	zb_uint16_t voc;
-	zb_uint16_t bat;
+};
+
+struct zb_zcl_power_config_battery_attrs_t {
+	zb_uint16_t voltage;
+	zb_uint16_t rated_voltage;
+	zb_uint16_t alarm_mask;
+	zb_uint16_t voltage_min_threshold;
+	zb_uint16_t percentage_remaining;
 };
 
 struct zb_device_ctx {
@@ -227,6 +254,7 @@ struct zb_device_ctx {
 	struct zb_zcl_humidity_measurement_attrs_t humidity_attrs;
 	struct zb_zcl_carbon_dioxide_attrs_t carbon_dioxide_attrs;
 	struct zb_zcl_aiq_attrs_t aiq_attrs;
+	struct zb_zcl_power_config_battery_attrs_t power_config_battery_attrs;
 };
 
 /**
@@ -287,7 +315,10 @@ EXTERNC int weather_station_update_humidity(float measured_humidity);
  *
  * @return 0 if success, error code if failure.
  */
-EXTERNC int weather_station_update_aiq(float measured_voc, float measured_iaq, uint16_t bat_millivolt);
+EXTERNC int weather_station_update_aiq(float measured_voc, float measured_iaq);
+
+EXTERNC int weather_station_update_battery(uint16_t battery_percentage);
+
 #undef EXTERNC
 
 #endif /* REPORTING_H */

@@ -11,7 +11,6 @@
 /*! @brief CurrentTemperature, ZCL spec 3.4.2.2.1 */
 #define ZB_ZCL_ATTR_AIQ_IAQ_ID (0xf005)
 #define ZB_ZCL_ATTR_AIQ_VOC_ID (0xf004)
-#define ZB_ZCL_ATTR_AIQ_BAT_ID (0xf00a) // this in truth is an "alarmEnabled" attribute, but we're using it for battery reporting
 
 #define ZB_ZCL_CLUSTER_ID_AIQ_SERVER_ROLE_INIT zb_zcl_aiq_init_server
 #define ZB_ZCL_CLUSTER_ID_AIQ_CLIENT_ROLE_INIT (NULL)
@@ -44,12 +43,10 @@ typedef void * zb_voidp_t;
     (zb_voidp_t) data_ptr \
   }
 
-#define ZB_ZCL_DECLARE_AIQ_ATTRIB_LIST(attr_list,                  \
-    iaq, voc, bat)                                     \
+#define ZB_ZCL_DECLARE_AIQ_ATTRIB_LIST(attr_list, iaq, voc) \
   ZB_ZCL_START_DECLARE_ATTRIB_LIST_CLUSTER_REVISION(attr_list, ZB_ZCL_AIQ) \
   ZB_ZCL_SET_ATTR_DESC(ZB_ZCL_ATTR_AIQ_IAQ_ID, (iaq))          \
   ZB_ZCL_SET_ATTR_DESC(ZB_ZCL_ATTR_AIQ_VOC_ID, (voc))          \
-  ZB_ZCL_SET_ATTR_DESC(ZB_ZCL_ATTR_AIQ_BAT_ID, (bat))          \
   ZB_ZCL_FINISH_DECLARE_ATTRIB_LIST
 
 void zb_zcl_aiq_init_server();

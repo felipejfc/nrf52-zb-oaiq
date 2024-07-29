@@ -21,7 +21,29 @@ int weather_station_init(void)
 	return err;
 }
 
-int weather_station_update_aiq(float voc, float iaq, uint16_t bat_millivolt)
+int weather_station_update_battery(uint16_t battery_percentage)
+{
+	int err = 0;
+
+	uint16_t battery_percentage_attribute = battery_percentage * ZCL_BATTERY_PERCENTAGE_REMAINING_MULTIPLIER;
+
+	int status = zb_zcl_set_attr_val(WEATHER_STATION_ENDPOINT_NB,
+												 ZB_ZCL_CLUSTER_ID_POWER_CONFIG,
+												 ZB_ZCL_CLUSTER_SERVER_ROLE,
+												 ZB_ZCL_ATTR_POWER_CONFIG_BATTERY_PERCENTAGE_REMAINING_ID,
+												 (zb_uint8_t *)&battery_percentage_attribute,
+												 ZB_FALSE);
+
+	if (status)
+	{
+		LOG_ERR("Failed to set ZCL attribute: %d", status);
+		err = status;
+	}
+
+	return err;
+}
+
+int weather_station_update_aiq(float voc, float iaq)
 {
 	int err = 0;
 
@@ -37,7 +59,6 @@ int weather_station_update_aiq(float voc, float iaq, uint16_t bat_millivolt)
 	iaq_attribute = (uint16_t)(iaq *
 									  ZCL_AIQ_MEASURED_VALUE_MULTIPLIER);
 	LOG_INF("Attribute I:%10d", iaq_attribute);
-	LOG_INF("Attribute B:%10d", bat_millivolt);
 
 	/* Set ZCL attribute */
 	zb_zcl_status_t status = zb_zcl_set_attr_val(WEATHER_STATION_ENDPOINT_NB,
@@ -58,19 +79,6 @@ int weather_station_update_aiq(float voc, float iaq, uint16_t bat_millivolt)
 												 ZB_ZCL_CLUSTER_SERVER_ROLE,
 												 ZB_ZCL_ATTR_AIQ_IAQ_ID,
 												 (zb_uint8_t *)&iaq_attribute,
-												 ZB_FALSE);
-	if (status)
-	{
-		LOG_ERR("Failed to set ZCL attribute: %d", status);
-		err = status;
-	}
-
-/* Set ZCL attribute */
-	status = zb_zcl_set_attr_val(WEATHER_STATION_ENDPOINT_NB,
-												 ZB_ZCL_CLUSTER_ID_AIQ,
-												 ZB_ZCL_CLUSTER_SERVER_ROLE,
-												 ZB_ZCL_ATTR_AIQ_BAT_ID,
-												 (zb_uint8_t *)&bat_millivolt,
 												 ZB_FALSE);
 	if (status)
 	{
